@@ -1,0 +1,153 @@
+#+TITLE:     Functional Package Management With GNU Guix
+#+AUTHOR:    Bonface Munyoki K.
+
+* Who I am
+
+- Scheme afficianado
+- Free s/w enthusiast
+- Linux/ FreeBSD enthusiast
+- Emacs user/ preacher ~.~
+
+https://bonfacemunyoki.com
+Twitter: @BonfaceKilz
+
+Emacs Makes All Computing Simple!
+-- Ludovic Cortes
+
+* What is Functional Package Management?
+
+- Inputs .e.g. build scripts, a compiler, patches, a library, a URL!
+- Build and installation process is a pure function
+- Same inputs will always guarantee the same output.
+- In GUIX, the inputs are build dependencies
+- They will always guarantee the same output
+- Solutions:
+  - NIX
+  - FlatPak
+
+
+* What is GUIX?
+
+- A functional package management based off Nix
+- Difference?
+  - It uses GUILE scheme as it's "DSL"
+  - Learn it once, and you can use it elsewhere
+  - Main GNU repos have to be "free" as in free beer. GPL compatible licences but...
+  - You can have channels too!
+- Build farms and substitute servers
+
+* Why GUIX
+*** Barriers to distro hacking
+- Packaging
+- Package management tools
+- Esoteric confs
+- Implementation language barriers
+
+*** Freedom and flexibility
+
+- Follows [[https://www.gnu.org/distros/free-system-distribution-guidelines.html][Free System Distribution Guidelines(GNU FSDG)]]
+- For hacking around
+- Truth! Hashes
+- Per-user package installation
+- Tnansactional upgrades & rollback
+  #+begin_src sh
+# List previous generations
+guix --list-generations
+  #+end_src
+
+*** Hackable
+- Allows for some very interesting optimisations:
+  - Easy to reason about behaviour of a function
+  - Cache
+  - Makes dependency graphs explicit
+- Everything stored in a "store". Allow's reusability across user profiles
+- A profile is a "forest" of symlinks to the store
+
+*** Extensible
+- Can run on any Linux distro
+- Guile
+- Functional
+- Get definitions from other places e.g. Pypi!
+- Safe! Can't alter anything outside build & installation dirs
+  Directory name contains hashes of all the inputs it needs
+
+*** Packing & Docker!
+- Pack s/w in a shareable way!
+  #+begin_src bash
+# tarball containing /gnu/store with all relevant packages
+# Output will be:
+# /gnu/store/3gkcajk2vyvl47916w33q7rxq6mpxvbl-tarball-pack.tar.gz
+guix pack -RR -S /mybin=bin inxi
+
+# Then later:
+~/opt/demo/bin/inxi --version
+  #+end_src
+
+- Produce a pack in the docker image format
+  #+begin_src bash
+guix pack -f docker -S /bin=bin inxi
+
+# Then later
+docker load < filename # filename is the image returned by guix pack
+docker run -ti inxi /bin/inxi
+  #+end_src
+
+- You can also pack into a squashFS image
+
+* Examples
+- Example of a channel:
+  http://git.genenetwork.org/guix-bioinformatics/guix-bioinformatics.git/
+
+- Installing a javascript dependency for some website:
+  #+begin_src scheme
+(define-public javascript-jquery-cookie
+  (package
+    (name "javascript-jquery-cookie")
+    (version "1.3.1")
+    (source (origin
+              (method git-fetch)
+              (uri (git-reference
+                    (url "https://github.com/carhartl/jquery-cookie.git")
+                    (commit (string-append "v" version))))
+              (file-name (git-file-name name version))
+              (sha256
+               (base32
+                "0a94jzk83pbsw3wd8pfa3g61yx2najhik0dzqr4nf1rsgmqbqhgc"))))
+    (build-system trivial-build-system)
+    (arguments
+     `(#:modules ((guix build utils))
+       #:builder
+       (let* ((out (assoc-ref %outputs "out"))
+              (targetdir (string-append out "/share/genenetwork2/javascript/jquery-cookie"))
+              (source (assoc-ref %build-inputs "source")))
+         (begin
+           (use-modules (guix build utils))
+           (install-file (string-append source "/jquery.cookie.js")
+                         targetdir)))))
+    (native-inputs `(("source" ,source)))
+    (home-page "http://jasonmayes.com/projects/twitterApi/")
+    (synopsis "A simple, lightweight jQuery plugin for reading, writing and deleting cookies.")
+    (description "A simple, lightweight jQuery plugin for reading, writing and deleting cookies. No longer maintained, superseded by JS Cookie: https://github.com/js-cookie/js-cookie")
+    (license license:expat)))
+
+  #+end_src
+
+  Random Quote:
+
+  When large numbers of non-technical workers are using a programmable editor,
+  they will be tempted constantly to begin programming in the course of their
+  day-to-day lives. This should contribute greatly to computer literacy
+  --  RMS
+
+* Your help is welcome!
+
+- Install the package manager
+- Use it, report bugs, add packages
+- Help with infra, and admin if you can
+- Share ideas
+- Chat on #guix on IRC
+
+* Further Reading
+
+- [[https://arxiv.org/pdf/1305.4584.pdf][Functional Package Management with Guix- white paper]]
+- [[https://guix.gnu.org/manual/en/html_node/Invoking-guix-pack.html][Invoking guix pack]]
