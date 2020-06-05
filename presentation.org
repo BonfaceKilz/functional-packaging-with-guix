@@ -21,7 +21,7 @@ Emacs Makes All Computing Simple!
 - Same inputs will always guarantee the same output.
 - In GUIX, the inputs are build dependencies
 - They will always guarantee the same output
-- Solutions:
+- Other Solutions:
   - NIX
   - FlatPak
 
@@ -31,12 +31,12 @@ Emacs Makes All Computing Simple!
 - A functional package management based off Nix
 - Difference?
   - It uses GUILE scheme as it's "DSL"
-  - Learn it once, and you can use it elsewhere
+  - Learn(GUILE) it once, and you can use it elsewhere
   - Main GNU repos have to be "free" as in free beer. GPL compatible licences but...
   - You can have channels too!
 - Build farms and substitute servers
 
-* Why GUIX
+* Why GUIX?
 *** Barriers to distro hacking
 - Packaging
 - Package management tools
@@ -49,7 +49,7 @@ Emacs Makes All Computing Simple!
 - For hacking around
 - Truth! Hashes
 - Per-user package installation
-- Tnansactional upgrades & rollback
+- Transactional upgrades & rollback
   #+begin_src sh
 # List previous generations
 guix --list-generations
@@ -68,6 +68,40 @@ guix --list-generations
 - Guile
 - Functional
 - Get definitions from other places e.g. Pypi!
+  #+begin_src bash
+guix import pypi git-fame
+
+# This outputs:
+# (package
+#   (name "python-git-fame")
+#   (version "1.11.1")
+#   (source
+#     (origin
+#       (method url-fetch)
+#       (uri (pypi-uri "git-fame" version))
+#       (sha256
+#         (base32
+#           "19ln0qn14vrwil5jcf99jb9bhhzc8kc6p0y6x4y6m3wabldgir4d"))))
+#   (build-system python-build-system)
+#   (propagated-inputs
+#     `(("python-argopt" ,python-argopt)
+#       ("python-tabulate" ,python-tabulate)))
+#   (native-inputs
+#     `(("python-py-make" ,python-py-make)
+#       ("python-pyyaml" ,python-pyyaml)
+#       ("python-tqdm" ,python-tqdm)
+#       ("python-twine" ,python-twine)))
+#   (home-page
+#     "https://github.com/casperdcl/git-fame")
+#   (synopsis
+#     "Pretty-print `git` repository collaborators sorted by contributions")
+#   (description
+#     "Pretty-print `git` repository collaborators sorted by contributions")
+#   (license #f))
+
+  #+end_src
+  supported imports: gnu, pypi, gem, cpan, cran, texlive, json, hackage,
+  stackage, elpa, crate, opam. Read more [[https://guix.gnu.org/manual/en/html_node/Invoking-guix-import.html][here]]
 - Safe! Can't alter anything outside build & installation dirs
   Directory name contains hashes of all the inputs it needs
 
@@ -94,7 +128,17 @@ docker run -ti inxi /bin/inxi
 
 - You can also pack into a squashFS image
 
+
+*** Deploys
+
+- You can even do deploys for machines running Guix! More of that [[https://guix.gnu.org/blog/2019/managing-servers-with-gnu-guix-a-tutorial/][here]]
+- Unfortunately, only limited to machines running Guix.
+  Hacks though: SSH(or ansible) + `guix package -m <some-manifest.scm>` is enough
+
+NB: The manifest.scm file is just a list of packages for a given profile.
+
 * Examples
+
 - Example of a channel:
   http://git.genenetwork.org/guix-bioinformatics/guix-bioinformatics.git/
 
