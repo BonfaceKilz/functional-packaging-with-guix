@@ -10,4 +10,4 @@ org-present[1] is used during the demos.
 
 [0] [The Org Manual](https://orgmode.org/manual/index.html)
 
-[1] [org-present](https://github.com/rlister/org-present
+[1] [org-present](https://github.com/rlister/org-present)
